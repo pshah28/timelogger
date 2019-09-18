@@ -1,5 +1,195 @@
 body {
   margin: 0;
-  padding: 0;
+  padding: 16px;
   font-family: sans-serif;
+  background: #E0DBDF;
+}
+
+ul
+{
+  padding: 0;
+  margin: 0;
+}
+
+button:focus
+{
+  outline: none;
+}
+
+button
+{
+  display: flex;
+  outline: none;
+  appearance: none;
+  border: 0;
+  border-radius: 0;
+  color: inherit;
+  font: inherit;
+  font-size: 100%;
+  margin: 0;
+  padding: 0;
+  vertical-align: baseline;
+  text-decoration: none;
+  cursor: pointer;
+  background: none;
+  text-align: left;
+}
+
+.App-body
+{
+  position: relative;
+}
+
+.Timelogger-controls
+{
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.Timelogger-bottomControls
+{
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.Timelogger-reload
+{
+  margin-left: auto;
+}
+
+.Timelogger-list
+{
+  height: 500px;
+  overflow-y: scroll;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 8px;
+}
+
+.Timelogger-control
+{
+  margin-right: 25px;
+}
+
+.Timelogger-icon
+{
+  height: 20px;
+  width: 20px;
+}
+
+.label
+{
+  font-weight: bold;
+  margin-right: 5px;
+}
+
+.btn_secondary
+{
+  text-decoration: underline;
+  color: #C697C1;
+  font-size: 16px;
+}
+
+.btn
+{
+  border-radius: 4px;
+  color: white;
+  background-color: #351431;
+  font-size: 16px;
+  padding: 16px;
+}
+
+.btn:hover
+{
+  background-color: #775273;
+}
+
+.Timelogger-listItem
+{
+  border-radius: 4px;
+  margin-top: 4px;
+  display: flex;
+  flex-shrink: 0;
+  background: #fff;
+}
+
+.Timelogger-listItemKey
+{
+  color: darkgray;
+}
+
+.Timelogger-listItem button
+{
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px;
+  padding-right: 16px;
+}
+
+.Timelogger-listItem.is-selected
+{
+  background-color: #D3C4D1;
+}
+
+.Header
+{
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.Header-title
+{
+  font-weight: bold;
+  font-size: 24px;
+  color: #351431;
+}
+
+.Header-icon
+{
+  height: 25px;
+  width: 25px;
+}
+
+.Timelogger-btnWrapper
+{
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 12px;
+}
+
+.Timelogger-status
+{
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.Timelogger-history
+{
+  display: flex;
+  align-items: center;
+  margin-left: 24px;
+}
+
+.Settings
+{
+  display: flex;
+  text-align: left;
+  flex-direction: column;
+  align-items: flex-start;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: #E0DBDF;
+}
+
+.Settings div
+{
+  margin-bottom: 16px;
 }
