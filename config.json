@@ -1,0 +1,1 @@
+{"jql":"project = PC AND assignee in (currentUser()) AND (status changed to closed during (startOfDay(-7d), startOfDay(-0d)) OR status != closed) ORDER BY updated DESC","timer":5}
