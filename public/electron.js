@@ -15,7 +15,12 @@ const jira = new JiraApi({
 
 let mainWindow;
 async function createWindow() {
-  mainWindow = new BrowserWindow({ width: 900 });
+  mainWindow = new BrowserWindow({
+    width: 900, 
+    webPreferences: {
+      nodeIntegration: false,
+      preload: __dirname + '/preload.js'
+    } });
   mainWindow.loadIssues = loadIssues;
   mainWindow.logTime = logTime;
   mainWindow.loadSettings = loadSettings;

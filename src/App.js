@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
-
-const { remote } = window.require('electron');
+const remote = window.remote
 
 const notify = () => {
     new Notification('Timelogger', {
@@ -33,7 +32,7 @@ class App extends Component {
     this.setState({
       settings: {...settings, timer: parseInt(settings.timer)},
       settingsInputs: settings,
-      notifierInterval: setInterval(notify, settings.timer * 60 * 1000),
+      interval: setInterval(notify, settings.timer * 60 * 1000),
     });
   }
 
