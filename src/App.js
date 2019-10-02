@@ -1,40 +1,31 @@
 import React, { Component } from 'react';
 import './App.css';
-
-const { remote } = window.require('electron');
+const remote = window.remote
 
 const notify = () => {
-    new Notification('Timelogger', {
-      body: 'time to log',
-      requireInteraction: true,
-    })
+  new Notification('Timelogger', {
+    body: 'time to log',
+    requireInteraction: true,
+  })
   }
 
 class App extends Component {
+  settings = remote.getCurrentWindow().loadSettings();
   state = {
     interval: null,
     menuOpen: false,
-    settings: {
-      username: '',
-      apikey: '',
-      jql: 'project = PC AND assignee in (currentUser()) AND (status changed to closed during (startOfDay(-7d), startOfDay(-0d)) OR status != closed) ORDER BY updated DESC',
-      timer: 30,
-    },
-    settingsInputs: {
-      username: '',
-      apikey: '',
-      jql: 'project = PC AND assignee in (currentUser()) AND (status changed to closed during (startOfDay(-7d), startOfDay(-0d)) OR status != closed) ORDER BY updated DESC',
-      timer: 30,
-    },
+    settings: this.settings,
+    settingsInputs: this.settings,
   };
-
-  componentDidMount() {
-    const settings = remote.getCurrentWindow().loadSettings();
-    this.setState({
-      settings: {...settings, timer: parseInt(settings.timer)},
-      settingsInputs: settings,
-      notifierInterval: setInterval(notify, settings.timer * 60 * 1000),
-    });
+  
+  async componentDidMount() {
+    if (this.settings) {
+      this.setState({
+        settings: {...this.settings, timer: parseFloat(this.settings.timer)},
+        settingsInputs: this.settings,
+        interval: setInterval(notify, parseFloat(this.settings.timer) * 60 * 1000),
+      });
+    }
   }
 
   onSettingChange(setting, value) {
@@ -42,13 +33,14 @@ class App extends Component {
   }
 
   onSettingsSave() {
+    console.log(this.state.settingsInputs)
     if (this.state.interval) {
       clearInterval(this.state.interval);
     }
     remote.getCurrentWindow().saveSettings(this.state.settingsInputs);
 
     this.setState((state) => ({
-      interval: setInterval(notify, state.settingsInputs.timer * 60 * 1000),
+      interval: setInterval(notify, parseFloat(state.settingsInputs.timer) * 60 * 1000),
       settings: { ...state.settingsInputs }
     }));
   }
@@ -97,8 +89,9 @@ class TimeLogger extends Component {
     interval: null,
   }
 
-  componentDidMount() {
-    this.loadJiraIssues();
+  async componentDidMount() {
+    console.log("hello")
+    await this.loadJiraIssues();
   }
 
   async onSubmit() {
@@ -191,7 +184,7 @@ class TimeLogger extends Component {
             <img className="Timelogger-icon" src="add.svg" />
           </button>
 
-          <button className="Timelogger-reload" onClick={() => this.loadJiraIssues()}>
+          <button className="Timelogger-reload" onClick={async () => await this.loadJiraIssues()}>
             <img className="Timelogger-icon" src="reload.svg" />
           </button>
         </div>
