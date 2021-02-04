@@ -33,7 +33,7 @@ class App extends Component {
     this.setState({
       settings: {...settings, timer: parseInt(settings.timer)},
       settingsInputs: settings,
-      notifierInterval: setInterval(notify, settings.timer * 60 * 1000),
+      interval: setInterval(notify, settings.timer * 60 * 1000),
     });
   }
 
