@@ -8,3 +8,5 @@
 * Handle error for bad JQL
 * Keyboard accessibility
 * Check contrasts for wcag
+* Build releases
+* Automatic updates
