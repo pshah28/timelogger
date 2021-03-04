@@ -160,15 +160,18 @@ export default class TimeLogger extends Component {
         <ul className={"TimeLogger-list TimeLogger-list--primary" + (unselectedIssues.length === 0 ? ' TimeLogger-list--noResults' : '')}>
           {this.primaryListContent(allIssues, unselectedIssues)}
         </ul>
-        {selectedIssues.length > 0 && <ul className="TimeLogger-list TimeLogger-list--active">
-          {selectedIssues.map((issue) => <Issue 
-            key={issue.key}
-            issueKey={issue.key}
-            onClick={this.onIssueClick.bind(this)}
-            selected={true}
-            summary={issue.fields.summary}
-          />)}
-        </ul>}
+        {selectedIssues.length > 0 && <div>
+            <div className="TimeLogger-listHeading">Selected Items</div>
+            <ul className="TimeLogger-list TimeLogger-list--active">
+              {selectedIssues.map((issue) => <Issue 
+                key={issue.key}
+                issueKey={issue.key}
+                onClick={this.onIssueClick.bind(this)}
+                selected={true}
+                summary={issue.fields.summary}
+              />)}
+            </ul>
+          </div>}
 
         {selectedIssues.length > 0 && <div className="TimeLogger-bottomControls">
           <button className="btn_secondary" onClick={() => this.onClearSelection()}>

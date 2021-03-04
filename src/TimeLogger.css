@@ -101,3 +101,9 @@
 .TimeLogger-list--active.TimeLogger-list {
   background-color: #c1a3d8;
 }
+
+.TimeLogger-listHeading {
+  font-size: 18px;
+  font-weight: bold;
+  color: #351431;
+}
