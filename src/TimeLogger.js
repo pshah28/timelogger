@@ -87,7 +87,6 @@ export default class TimeLogger extends Component {
   }
 
   async loadJiraIssues() {
-    console.log("LOADING JIRA: ", this.props.jql);
     this.setState({ isLoading: true });
     const issues = await remote.getCurrentWindow().loadIssues(this.props.jql);
     let extraIssues = [];
