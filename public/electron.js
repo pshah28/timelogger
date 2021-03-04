@@ -84,7 +84,7 @@ const logTime = async (keys, minutes) => {
 
   for (const key of keys) {
     try {
-      await jira.addWorklog(key, { timeSpentSeconds: secondsPerItem });
+      await jiraClient.addWorklog(key, { timeSpentSeconds: secondsPerItem });
       logged.push(key);
     } catch (err) {
       throw err
