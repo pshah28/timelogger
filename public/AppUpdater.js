@@ -5,6 +5,7 @@ class AppUpdater {
   constructor() {
     autoUpdater.logger = log;
     autoUpdater.logger.transports.file.level = 'info';
+    autoUpdater.allowPrerelease = true;
     log.info('App starting...');
     autoUpdater.checkForUpdatesAndNotify();
   }
