@@ -112,6 +112,14 @@ export default class TimeLogger extends Component {
     this.setState({ timeToLog: amt });
   }
 
+  onResetLastLogTime() {
+    this.setState({ 
+      currentTimestamp: new Date().getTime(),
+      previousSubmitTimestamp: new Date().getTime(),
+    });
+  }
+
+
   primaryListContent(allIssues, unselectedIssues) {
     if (allIssues.length === 0) return <li>No items found. Please update your JQL or manually add an item.</li>
     if (unselectedIssues.length === 0 && Object.keys(this.state.selectedKeys).length === allIssues.length) return <li>:)</li>
@@ -187,6 +195,9 @@ export default class TimeLogger extends Component {
 
             <div style={{marginLeft: '8px'}}>
               <button className="btn_secondary" onClick={() => this.onLogThisMuch(timeSinceLog)}>(use this amount)</button>
+            </div>
+            <div style={{marginLeft: '8px'}}>
+              <button className="btn_secondary" onClick={() => this.onResetLastLogTime()}>(reset)</button>
             </div>
           </div>}
         </div>
