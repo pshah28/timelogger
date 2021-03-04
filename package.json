@@ -1,7 +1,7 @@
 {
   "name": "timelogger",
   "description": "Reminder to log your time",
-  "author": "pshah",
+  "author": "bhainesva",
   "version": "0.2.7",
   "private": true,
   "dependencies": {
@@ -43,6 +43,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/pshah28/timelogger.git"
+    "url": "https://github.com/bhainesva/timelogger.git"
   }
 }
