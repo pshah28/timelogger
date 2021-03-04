@@ -1,0 +1,91 @@
+.TimeLogger-listItem
+{
+  border-radius: 4px;
+  margin-top: 4px;
+  display: flex;
+  flex-shrink: 0;
+  background: #fff;
+}
+
+.TimeLogger-listItemKey
+{
+  color: darkgray;
+}
+
+.TimeLogger-listItem button
+{
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px;
+  padding-right: 16px;
+}
+
+.TimeLogger-btnWrapper
+{
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 12px;
+}
+
+.TimeLogger-status
+{
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.TimeLogger-history
+{
+  display: flex;
+  align-items: center;
+  margin-left: 24px;
+}
+
+.TimeLogger-icon
+{
+  height: 20px;
+  width: 20px;
+}
+
+.TimeLogger-controls
+{
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.TimeLogger-bottomControls
+{
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.TimeLogger-reload
+{
+  margin-left: auto;
+}
+
+.TimeLogger-list
+{
+  overflow-y: scroll;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  padding: 15px;
+}
+
+.TimeLogger-control
+{
+  margin-right: 25px;
+}
+
+.TimeLogger-list--primary.TimeLogger-list {
+  background-color: #5d4d6b;
+}
+
+.TimeLogger-list--active.TimeLogger-list {
+  background-color: #c1a3d8;
+}

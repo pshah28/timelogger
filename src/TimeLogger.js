@@ -1,6 +1,21 @@
 import React, { Component } from 'react';
 const { remote } = window.require('electron');
 
+function Issue(props) {
+  return (
+    <li className={"TimeLogger-listItem" + (props.selected ? " is-selected" : "")} key={props.issueKey}>
+    <button onClick={() => props.onClick(props.issueKey)}>
+      <div>
+        {props.summary}
+      </div>
+      <div className="TimeLogger-listItemKey">
+        {props.issueKey}
+      </div>
+    </button>
+    </li>
+  )
+}
+
 export default class TimeLogger extends Component {
   state = {
     issues: [],
@@ -99,62 +114,66 @@ export default class TimeLogger extends Component {
 
   render() {
     const allIssues = this.state.issues.concat(this.state.extraIssues);
-    const issues = this.state.itemFilter ? allIssues.filter(issue => (issue.key + ' ' + issue.fields.summary).toLowerCase().includes(this.state.itemFilter.toLowerCase())) : allIssues;
+    const filteredIssues = this.state.itemFilter ? allIssues.filter(issue => (issue.key + ' ' + issue.fields.summary).toLowerCase().includes(this.state.itemFilter.toLowerCase())) : allIssues;
+    const unselectedIssues = filteredIssues.filter(issue => !(issue.key in this.state.selectedKeys));
+    const selectedIssues = allIssues.filter(issue => issue.key in this.state.selectedKeys);
     const timeSinceLog = Math.floor((this.state.currentTimestamp - this.state.previousSubmitTimestamp) / 60000);
 
     return (
-      <div className="Timelogger" style={{ display: "flex", flexDirection: "column" }}>
-        <div className="Timelogger-controls">
-          <div className="Timelogger-control">
+      <div className="TimeLogger" style={{ display: "flex", flexDirection: "column" }}>
+        <div className="TimeLogger-controls">
+          <div className="TimeLogger-control">
             <span className="label">Filter:</span> <input onChange={(e) => this.onFilterChange(e)} type="text"></input>
           </div>
 
           <span className="label">Add item:</span><input onChange={(e) => this.onAddItemChange(e)} value={this.state.addItemInput}></input>
           <button onClick={() => this.onAddKey()}>
-            <img className="Timelogger-icon" src="add.svg" alt="plus icon" />
+            <img className="TimeLogger-icon" src="add.svg" alt="plus icon" />
           </button>
 
 
 
-          <button className="Timelogger-reload" onClick={() => this.loadJiraIssues()}>
-            <img className="Timelogger-icon" src="reload.svg" alt="refresh icon"/>
+          <button className="TimeLogger-reload" onClick={() => this.loadJiraIssues()}>
+            <img className="TimeLogger-icon" src="reload.svg" alt="refresh icon"/>
           </button>
         </div>
 
-        <ul className="Timelogger-list">
-          {issues.map((issue) => {
-            return <li className={"Timelogger-listItem" + (issue.key in this.state.selectedKeys ? " is-selected" : "")} key={issue.key}>
-              <button onClick={() => this.onIssueClick(issue.key)}>
-                <div>
-                  {issue.fields.summary}
-                </div>
-                <div className="Timelogger-listItemKey">
-                  {issue.key}
-                </div>
-              </button>
-            </li>;
-          })}
+        <ul className="TimeLogger-list TimeLogger-list--primary">
+          {unselectedIssues.filter(issue => !(issue.key in this.state.selectedKeys)).map((issue) => <Issue 
+            onClick={this.onIssueClick.bind(this)}
+            issueKey={issue.key}
+            selected={false}
+            summary={issue.fields.summary}
+          />)}
         </ul>
+        {selectedIssues.length > 0 && <ul className="TimeLogger-list TimeLogger-list--active">
+          {selectedIssues.map((issue) => <Issue 
+            onClick={this.onIssueClick.bind(this)}
+            issueKey={issue.key}
+            selected={true}
+            summary={issue.fields.summary}
+          />)}
+        </ul>}
 
-        <div className="Timelogger-bottomControls">
+        {selectedIssues.length > 0 && <div className="TimeLogger-bottomControls">
           <button className="btn_secondary" onClick={() => this.onClearSelection()}>
             Clear Selections
           </button>
-        </div>
+        </div>}
 
-        <div className="Timelogger-btnWrapper">
-          <button className="Timelogger-submit btn" onClick={this.onSubmit.bind(this)}>
+        <div className="TimeLogger-btnWrapper">
+          <button className="TimeLogger-submit btn" onClick={this.onSubmit.bind(this)}>
             Log Time
           </button>
         </div>
 
-        <div className="Timelogger-status">
+        <div className="TimeLogger-status">
           <div>
             <span className="label">Log this many minutes:</span>
             <input onChange={this.onTimeToLogChange.bind(this)} value={this.state.timeToLog} />
           </div>
           {this.state.previousSubmitTimestamp !== 0 &&
-          <div className="Timelogger-history">
+          <div className="TimeLogger-history">
             <span className="label">Minutes since last log:</span>
             {timeSinceLog}
 
