@@ -4,6 +4,7 @@
   "author": "bhainesva",
   "version": "0.2.7",
   "private": true,
+  "homepage": ".",
   "dependencies": {
     "cross-env": "5.1.6",
     "electron-is-dev": "0.3.0",
