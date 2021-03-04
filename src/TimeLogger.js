@@ -28,6 +28,7 @@ export default class TimeLogger extends Component {
     previousSubmitTimestamp: 0,
     currentTimestamp: 0,
     interval: null,
+    isLoading: true,
   }
 
   componentDidMount() {
@@ -87,12 +88,13 @@ export default class TimeLogger extends Component {
 
   async loadJiraIssues() {
     console.log("LOADING JIRA: ", this.props.jql);
+    this.setState({ isLoading: true });
     const issues = await remote.getCurrentWindow().loadIssues(this.props.jql);
     let extraIssues = [];
     if (this.state.extraKeys.length) {
       extraIssues = await remote.getCurrentWindow().loadIssues(`issuekey in (${this.state.extraKeys.join(',')})`);
     }
-    this.setState({ issues, extraIssues });
+    this.setState({ issues, extraIssues, isLoading: false });
   }
 
   onTimeToLogChange(e) {
@@ -120,6 +122,7 @@ export default class TimeLogger extends Component {
 
 
   primaryListContent(allIssues, unselectedIssues) {
+    if (this.state.isLoading) return <li>Loading Jira Issues...</li>
     if (allIssues.length === 0) return <li>No items found. Please update your JQL or manually add an item.</li>
     if (unselectedIssues.length === 0 && Object.keys(this.state.selectedKeys).length === allIssues.length) return <li>:)</li>
     if (unselectedIssues.length === 0 && this.state.itemFilter) return <li>No items matching filter "{this.state.itemFilter}"</li>
@@ -157,7 +160,7 @@ export default class TimeLogger extends Component {
           </button>
         </div>
 
-        <ul className={"TimeLogger-list TimeLogger-list--primary" + (unselectedIssues.length === 0 ? ' TimeLogger-list--noResults' : '')}>
+        <ul className={"TimeLogger-list TimeLogger-list--primary" + ((this.state.isLoading || unselectedIssues.length === 0) ? ' TimeLogger-list--noResults' : '')}>
           {this.primaryListContent(allIssues, unselectedIssues)}
         </ul>
         {selectedIssues.length > 0 && <div>
