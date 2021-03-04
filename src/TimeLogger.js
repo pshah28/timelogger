@@ -3,15 +3,15 @@ const { remote } = window.require('electron');
 
 function Issue(props) {
   return (
-    <li className={"TimeLogger-listItem" + (props.selected ? " is-selected" : "")} key={props.issueKey}>
-    <button onClick={() => props.onClick(props.issueKey)}>
-      <div>
-        {props.summary}
-      </div>
-      <div className="TimeLogger-listItemKey">
-        {props.issueKey}
-      </div>
-    </button>
+    <li className={"TimeLogger-listItem" + (props.selected ? " is-selected" : "")}>
+      <button onClick={() => props.onClick(props.issueKey)}>
+        <div>
+          {props.summary}
+        </div>
+        <div className="TimeLogger-listItemKey">
+          {props.issueKey}
+        </div>
+      </button>
     </li>
   )
 }
@@ -112,6 +112,18 @@ export default class TimeLogger extends Component {
     this.setState({ timeToLog: amt });
   }
 
+  primaryListContent(allIssues, unselectedIssues) {
+    if (allIssues.length === 0) return <li>No items found. Please update your JQL or manually add an item.</li>
+    if (unselectedIssues.length === 0 && Object.keys(this.state.selectedKeys).length === allIssues.length) return <li>:)</li>
+    if (unselectedIssues.length === 0 && this.state.itemFilter) return <li>No items matching filter "{this.state.itemFilter}"</li>
+    return unselectedIssues.filter(issue => !(issue.key in this.state.selectedKeys)).map((issue) => <Issue 
+      onClick={this.onIssueClick.bind(this)}
+      key={issue.key}
+      issueKey={issue.key}
+      selected={false}
+      summary={issue.fields.summary} />);
+  }
+
   render() {
     const allIssues = this.state.issues.concat(this.state.extraIssues);
     const filteredIssues = this.state.itemFilter ? allIssues.filter(issue => (issue.key + ' ' + issue.fields.summary).toLowerCase().includes(this.state.itemFilter.toLowerCase())) : allIssues;
@@ -138,18 +150,14 @@ export default class TimeLogger extends Component {
           </button>
         </div>
 
-        <ul className="TimeLogger-list TimeLogger-list--primary">
-          {unselectedIssues.filter(issue => !(issue.key in this.state.selectedKeys)).map((issue) => <Issue 
-            onClick={this.onIssueClick.bind(this)}
-            issueKey={issue.key}
-            selected={false}
-            summary={issue.fields.summary}
-          />)}
+        <ul className={"TimeLogger-list TimeLogger-list--primary" + (unselectedIssues.length === 0 ? ' TimeLogger-list--noResults' : '')}>
+          {this.primaryListContent(allIssues, unselectedIssues)}
         </ul>
         {selectedIssues.length > 0 && <ul className="TimeLogger-list TimeLogger-list--active">
           {selectedIssues.map((issue) => <Issue 
-            onClick={this.onIssueClick.bind(this)}
+            key={issue.key}
             issueKey={issue.key}
+            onClick={this.onIssueClick.bind(this)}
             selected={true}
             summary={issue.fields.summary}
           />)}
