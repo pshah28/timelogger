@@ -4,17 +4,33 @@ const path = require("path");
 const isDev = require("electron-is-dev");
 var JiraApi = require('jira-client');
 // Initialize
-const jira = new JiraApi({
+const baseJiraSettings = {
   protocol: 'https',
   host: 'yexttest.atlassian.net',
   username: '',
   password: '',
   apiVersion: '2',
-  strictSSL: true
-});
+  strictSSL: true,
+}
+
+let jiraUser = '';
+let jiraPass = '';
+let jiraClient;
+function refreshJiraClient(settings) {
+  const { username, apikey } = settings;
+  if (username !== jiraUser || apikey !== jiraPass) {
+    jiraUser = username;
+    jiraPass = apikey;
+    jiraClient = new JiraApi(Object.assign(baseJiraSettings, {
+      username,
+      password: apikey,
+    }))
+  }
+}
 
 let mainWindow;
 async function createWindow() {
+  loadSettings();
   mainWindow = new BrowserWindow({ width: 900 });
   mainWindow.loadIssues = loadIssues;
   mainWindow.logTime = logTime;
@@ -41,16 +57,19 @@ app.on("activate", () => {
 });
 
 async function loadIssues(jql) {
-  const resp = await jira.searchJira(jql)
+  const resp = await jiraClient.searchJira(jql)
   return resp.issues;
 }
 
 function loadSettings() {
   const settings = new Settings();
-  return settings.get();
+  const settingsData = settings.get();
+  refreshJiraClient(settingsData);
+  return settingsData;
 }
 
 function saveSettings(data) {
+  refreshJiraClient(data);
   const settings = new Settings();
   settings.set(data);
 }
