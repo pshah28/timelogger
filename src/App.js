@@ -14,7 +14,7 @@ const notify = () => {
     })
   }
 
-const defaultJQL = 'project in (PC, CR) AND assignee in (currentUser()) AND ((status changed to done during (startOfDay(-7d), startOfDay(-0d)) OR status changed to closed during (startOfDay(-7d), startOfDay(-0d))) OR status not in (closed, done)) ORDER BY updated DESC';
+const defaultJQL = 'project in (PC, CR) AND assignee in (currentUser()) AND ((status changed to done during (startOfDay(-7d), startOfDay(-0d)) OR status changed to closed during (startOfDay(-7d), startOfDay(-0d))) OR status not in (closed, done)) OR key in (CO-442, CO-447) ORDER BY updated DESC';
 
 class App extends Component {
   state = {
