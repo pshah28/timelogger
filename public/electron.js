@@ -6,23 +6,26 @@ var JiraApi = require('jira-client');
 // Initialize
 const baseJiraSettings = {
   protocol: 'https',
-  host: 'yexttest.atlassian.net',
+  host: '',
   username: '',
   password: '',
   apiVersion: '2',
   strictSSL: true,
 }
 
+let jiraHost = '';
 let jiraUser = '';
 let jiraPass = '';
 let jiraClient;
 function refreshJiraClient(settings) {
-  const { username, apikey } = settings;
-  if (username !== jiraUser || apikey !== jiraPass) {
+  const { username, apikey, jiraHost : host } = settings;
+  if (username !== jiraUser || apikey !== jiraPass || jiraHost !== host) {
+    jiraHost = host;
     jiraUser = username;
     jiraPass = apikey;
     jiraClient = new JiraApi(Object.assign(baseJiraSettings, {
       username,
+      host,
       password: apikey,
     }))
   }

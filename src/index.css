@@ -1,3 +1,16 @@
+@import 'initial.css';
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+div#root,
+.App {
+  height: 100%;
+}
+
 body {
   margin: 0;
   padding: 16px;

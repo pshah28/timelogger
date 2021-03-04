@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import TimeLogger from './TimeLogger';
 import Header from './Header';
 import Settings from './Settings';
+import Initial from './Initial';
 import './App.css';
 
 const { remote } = window.require('electron');
@@ -13,19 +14,21 @@ const notify = () => {
     })
   }
 
-const defaultJQL = 'project in (PC, CR) AND assignee in (currentUser()) AND (status changed to closed during (startOfDay(-7d), startOfDay(-0d)) OR status not in (closed, done)) ORDER BY updated DESC';
+const defaultJQL = 'project in (PC, CR) AND assignee in (currentUser()) AND ((status changed to done during (startOfDay(-7d), startOfDay(-0d)) OR status changed to closed during (startOfDay(-7d), startOfDay(-0d))) OR status not in (closed, done)) ORDER BY updated DESC';
 
 class App extends Component {
   state = {
     interval: null,
     menuOpen: false,
     settings: {
+      jiraHost: '',
       username: '',
       apikey: '',
       jql: defaultJQL,
       timer: 30,
     },
     settingsInputs: {
+      jiraHost: '',
       username: '',
       apikey: '',
       jql: defaultJQL,
@@ -57,16 +60,25 @@ class App extends Component {
       menuOpen: false,
       settings: { 
         ...state.settingsInputs,
-        jql: state.settingsInputs.jql ? state.settingsInputs.jql : defaultJQL,
+        jql: state.settingsInputs.jql.trim() ? state.settingsInputs.jql : defaultJQL,
       }
     }));
   }
 
   onHeaderMenuClick() {
-    this.setState(state => ({
-      menuOpen: !state.menuOpen,
-      settingsInputs: state.menuOpen ? state.settings : state.settingsInputs,
-    }));
+    this.setState(state => {
+      const settingsInputs = state.menuOpen ? state.settings : state.settingsInputs;
+      settingsInputs.jql = settingsInputs.jql.trim() ? settingsInputs.jql : defaultJQL;
+
+      return {
+        menuOpen: !state.menuOpen,
+        settingsInputs: settingsInputs,
+      }
+    });
+  }
+
+  requiredSettingsPresent() {
+    return this.state.settings.username !== '' && this.state.settings.apikey !== '' && this.state.settings.jiraHost;
   }
 
   render() {
@@ -77,7 +89,8 @@ class App extends Component {
           icon={this.state.menuOpen ? 'close' : 'settings'}/>
         <div className="App-body">
           {this.state.menuOpen && <Settings onChange={this.onSettingChange.bind(this)} onSave={this.onSettingsSave.bind(this)} settings={this.state.settingsInputs} />}
-          <TimeLogger jql={this.state.settings.jql} />
+          {!this.requiredSettingsPresent() && <Initial />}
+          {this.requiredSettingsPresent() && <TimeLogger jql={this.state.settings.jql} />}
         </div>
       </div>
     )
