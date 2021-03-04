@@ -1,9 +1,11 @@
 const { app, BrowserWindow } = require('electron');;
 const { Settings } = require('./Settings');
+const { AppUpdater } = require('./AppUpdater');
 const path = require("path");
 const isDev = require("electron-is-dev");
 var JiraApi = require('jira-client');
 // Initialize
+new AppUpdater();
 const baseJiraSettings = {
   protocol: 'https',
   host: '',
