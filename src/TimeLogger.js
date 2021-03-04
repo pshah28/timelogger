@@ -43,15 +43,14 @@ export default class TimeLogger extends Component {
       currentTimestamp: timestamp,
       previousSubmitTimestamp: timestamp,
     });
-    if (!this.state.timeout) {
-      this.setState({
-        interval: setInterval(
-          () => {
-            this.setState({ currentTimestamp: new Date().getTime() })
-          }, 60000
-        )
-      });
-    }
+    this.setState({
+      interval: setInterval(
+        () => {
+          this.setState({ currentTimestamp: new Date().getTime() })
+        }, 60000
+      )
+    });
+    if (this.props.onLogTime) this.props.onLogTime();
     window.alert("logged time to " + resp.join(', '));
   }
 

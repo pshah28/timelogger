@@ -49,10 +49,14 @@ class App extends Component {
     this.setState({ settingsInputs: { ...this.state.settingsInputs, [setting]: value } });
   }
 
-  onSettingsSave() {
+  resetInterval() {
     if (this.state.interval) {
       clearInterval(this.state.interval);
     }
+  }
+
+  onSettingsSave() {
+    this.resetInterval();
     remote.getCurrentWindow().saveSettings(this.state.settingsInputs);
 
     this.setState((state) => ({
@@ -90,7 +94,7 @@ class App extends Component {
         <div className="App-body">
           {this.state.menuOpen && <Settings onChange={this.onSettingChange.bind(this)} onSave={this.onSettingsSave.bind(this)} settings={this.state.settingsInputs} />}
           {!this.requiredSettingsPresent() && <Initial />}
-          {this.requiredSettingsPresent() && <TimeLogger jql={this.state.settings.jql} />}
+          {this.requiredSettingsPresent() && <TimeLogger onLogTime={this.resetInterval.bind(this)} jql={this.state.settings.jql} />}
         </div>
       </div>
     )
