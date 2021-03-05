@@ -15,6 +15,7 @@ const notify = () => {
   }
 
 const defaultJQL = 'project in (PC, CR) AND assignee in (currentUser()) AND ((status changed to done during (startOfDay(-7d), startOfDay(-0d)) OR status changed to closed during (startOfDay(-7d), startOfDay(-0d))) OR status not in (closed, done)) OR key in (CO-442, CO-447) ORDER BY updated DESC';
+const defaultTimer = 30;
 
 class App extends Component {
   state = {
@@ -25,21 +26,21 @@ class App extends Component {
       username: '',
       apikey: '',
       jql: defaultJQL,
-      timer: 30,
+      timer: defaultTimer,
     },
     settingsInputs: {
       jiraHost: '',
       username: '',
       apikey: '',
       jql: defaultJQL,
-      timer: 30,
+      timer: defaultTimer,
     },
   };
 
   componentDidMount() {
     const settings = remote.getCurrentWindow().loadSettings();
     this.setState({
-      settings: {...settings, timer: parseInt(settings.timer, 10)},
+      settings: {...settings, timer: parseInt(settings.timer, 10) > 0 ? parseInt(settings.timer, 10) : defaultTimer},
       settingsInputs: settings,
       interval: setInterval(notify, settings.timer * 60 * 1000),
     });
@@ -57,22 +58,28 @@ class App extends Component {
 
   onSettingsSave() {
     this.resetInterval();
-    remote.getCurrentWindow().saveSettings(this.state.settingsInputs);
 
-    this.setState((state) => ({
-      interval: setInterval(notify, state.settingsInputs.timer * 60 * 1000),
-      menuOpen: false,
-      settings: { 
+    this.setState((state) => {
+      const updatedSettings = {
         ...state.settingsInputs,
         jql: state.settingsInputs.jql.trim() ? state.settingsInputs.jql : defaultJQL,
+        timer: state.settingsInputs.timer > 0 ? state.settingsInputs.timer : defaultTimer,
       }
-    }));
+      remote.getCurrentWindow().saveSettings(updatedSettings);
+
+      return {
+        interval: setInterval(notify, updatedSettings.timer * 60 * 1000),
+        menuOpen: false,
+        settings: updatedSettings,
+      }
+    });
   }
 
   onHeaderMenuClick() {
     this.setState(state => {
       const settingsInputs = state.menuOpen ? state.settings : state.settingsInputs;
       settingsInputs.jql = settingsInputs.jql.trim() ? settingsInputs.jql : defaultJQL;
+      settingsInputs.timer = settingsInputs.timer > 0 ? settingsInputs.timer : defaultTimer;
 
       return {
         menuOpen: !state.menuOpen,
