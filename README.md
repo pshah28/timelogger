@@ -1,20 +1,31 @@
-### 🙋‍♂️ Made by [@thekitze](https://twitter.com/thekitze)  
+# Timelogger
 
-### Other projects:
-- 🏫 [React Academy](https://reactacademy.io) - Interactive React and GraphQL workshops
-- 💌 [Twizzy](https://twizzy.app) - A standalone app for Twitter DM
-- 💻 [Sizzy](https://sizzy.co) - A tool for testing responsive design on multiple devices at once
-- 🤖 [JSUI](https://github.com/kitze/JSUI) - A powerful UI toolkit for managing JavaScript apps
+App to make logging time less painful
 
----
+![Main application interface](img1.png)
 
-# React + Electron = 😍
+![Setting page](img2.png)
 
-An example of using create-react-app and Electron.
+## Features
+* Customize JQL for your visible items
+* Filter items by name / key
+* Notifications on a customizable schedule
+* It's purple
+* Keeps track of time since your last log
+* Log to multiple items at once
+* You can click on the items and they'll move in between the two different colored boxes it's a lot of fun
+* Automatic updates
 
-## Scripts
-```yarn start``` will start the Electron app and the React app at the same time.  
-```yarn build``` will build the React app and package it along the Electron app.
+## Usage
+Download the latest releast from https://github.com/bhainesva/timelogger/releases, will automatically update when new versions are released
 
-## Read more
-You can read more about it in [my Medium article](https://medium.com/@kitze/%EF%B8%8F-from-react-to-an-electron-app-ready-for-production-a0468ecb1da3).
+You will need:
+* Jira Host - <company>.atlassian.net
+* Jira Username - the email you use to log in
+* Jira API Token - https://id.atlassian.com/manage-profile/security/api-tokens
+
+## Local Development
+
+Clone the repo, run `yarn` to install dependencies, `yarn start` to start the app.
+
+Started with this thing: https://github.com/kitze/react-electron-example
