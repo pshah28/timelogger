@@ -4,7 +4,8 @@ import Header from './Header';
 import Settings from './Settings';
 import Initial from './Initial';
 import './App.css';
-const remote = window.remote
+
+const { remote } = window.require('electron');
 
 const notify = () => {
   new Notification('Timelogger', {
