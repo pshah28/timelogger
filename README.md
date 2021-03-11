@@ -17,7 +17,7 @@ App to make logging time less painful
 * Automatic updates
 
 ## Usage
-Download the latest releast from https://github.com/bhainesva/timelogger/releases, will automatically update when new versions are released
+Download the latest releast from https://github.com/pshah28/timelogger/releases, will automatically update when new versions are released
 
 You will need:
 * Jira Host - <company>.atlassian.net
