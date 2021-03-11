@@ -33,18 +33,53 @@ function refreshJiraClient(settings) {
   }
 }
 
-let mainWindow;
 async function createWindow() {
-  loadSettings();
-  mainWindow = new BrowserWindow({ width: 900 });
-  mainWindow.loadIssues = loadIssues;
-  mainWindow.logTime = logTime;
-  mainWindow.loadSettings = loadSettings;
-  mainWindow.saveSettings = saveSettings;
+  const mainWindow = new TimeLoggerWindow({ width: 900 });
   mainWindow.loadURL(
     isDev ? "http://localhost:3000" : `file://${path.join(__dirname, "../build/index.html")}`
   );
   mainWindow.on("closed", () => { mainWindow = null });
+}
+
+class TimeLoggerWindow extends BrowserWindow {
+  constructor(options) {
+    super(options)
+    this.loadSettings();
+  }
+
+  async loadIssues(jql) {
+    const resp = await jiraClient.searchJira(jql);
+    return resp.issues;
+  }
+
+  loadSettings() {
+    const settings = new Settings();
+    const settingsData = settings.get();
+    refreshJiraClient(settingsData);
+    return settingsData;
+  }
+
+  saveSettings(data) {
+    refreshJiraClient(data);
+    const settings = new Settings();
+    settings.set(data);
+  }
+
+  async logTime(keys, minutes) {
+    const logged = [];
+    const seconds = minutes * 60;
+    const secondsPerItem = seconds / keys.length
+
+    for (const key of keys) {
+      try {
+        await jiraClient.addWorklog(key, { timeSpentSeconds: secondsPerItem });
+        logged.push(key);
+      } catch (err) {
+        throw err
+      }
+    }
+    return logged
+  }
 }
 
 app.on("ready", createWindow);
@@ -60,37 +95,3 @@ app.on("activate", () => {
     createWindow();
   }
 });
-
-async function loadIssues(jql) {
-  const resp = await jiraClient.searchJira(jql)
-  return resp.issues;
-}
-
-function loadSettings() {
-  const settings = new Settings();
-  const settingsData = settings.get();
-  refreshJiraClient(settingsData);
-  return settingsData;
-}
-
-function saveSettings(data) {
-  refreshJiraClient(data);
-  const settings = new Settings();
-  settings.set(data);
-}
-
-const logTime = async (keys, minutes) => {
-  const logged = [];
-  const seconds = minutes * 60;
-  const secondsPerItem = seconds / keys.length
-
-  for (const key of keys) {
-    try {
-      await jiraClient.addWorklog(key, { timeSpentSeconds: secondsPerItem });
-      logged.push(key);
-    } catch (err) {
-      throw err
-    }
-  }
-  return logged
-}
