@@ -20,7 +20,7 @@ App to make logging time less painful
 Download the latest releast from https://github.com/pshah28/timelogger/releases, will automatically update when new versions are released
 
 You will need:
-* Jira Host - <company>.atlassian.net
+* Jira Host - \<company\>.atlassian.net
 * Jira Username - the email you use to log in
 * Jira API Token - https://id.atlassian.com/manage-profile/security/api-tokens
 
