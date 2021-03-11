@@ -1,15 +1,18 @@
 {
   "name": "timelogger",
   "description": "Reminder to log your time",
-  "author": "pshah",
+  "author": "pshah28",
   "version": "0.2.7",
   "private": true,
+  "homepage": ".",
   "dependencies": {
     "configstore": "^5.0.0",
     "cross-env": "5.1.6",
     "electron-is-dev": "0.3.0",
     "electron-log": "^2.2.6",
-    "global": "^4.4.0",
+    "electron-prompt": "^1.3.1",
+    "electron-updater": "^4.3.8",
+    "fetch": "^1.1.0",
     "jira-client": "^6.11.0",
     "keychain": "^1.3.0",
     "nedb": "^1.8.0",
@@ -19,9 +22,9 @@
     "update-electron-app": "^1.2.0"
   },
   "devDependencies": {
-    "concurrently": "latest",
-    "electron": "latest",
-    "electron-builder": "latest",
+    "concurrently": "3.5.1",
+    "electron": "4.2.8",
+    "electron-builder": "^20.15.1",
     "prettier": "^1.4.4",
     "react-scripts": "latest",
     "wait-on": "2.1.0"
@@ -45,18 +48,5 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/pshah28/timelogger.git"
-  },
-  "homepage": "./",
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
   }
 }

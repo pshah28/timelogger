@@ -1,4 +1,8 @@
 import React, { Component } from 'react';
+import TimeLogger from './TimeLogger';
+import Header from './Header';
+import Settings from './Settings';
+import Initial from './Initial';
 import './App.css';
 const remote = window.remote
 
@@ -9,258 +13,99 @@ const notify = () => {
   })
   }
 
+const defaultJQL = 'project in (PC, CR) AND assignee in (currentUser()) AND ((status changed to done during (startOfDay(-7d), startOfDay(-0d)) OR status changed to closed during (startOfDay(-7d), startOfDay(-0d))) OR status not in (closed, done)) OR key in (CO-442, CO-447) ORDER BY updated DESC';
+const defaultTimer = 30;
+
 class App extends Component {
-  settings = remote.getCurrentWindow().loadSettings();
   state = {
     interval: null,
     menuOpen: false,
-    settings: this.settings,
-    settingsInputs: this.settings,
+    settings: {
+      jiraHost: '',
+      username: '',
+      apikey: '',
+      jql: defaultJQL,
+      timer: defaultTimer,
+    },
+    settingsInputs: {
+      jiraHost: '',
+      username: '',
+      apikey: '',
+      jql: defaultJQL,
+      timer: defaultTimer,
+    },
   };
-  
-  async componentDidMount() {
-    if (this.settings) {
-      this.setState({
-        settings: {...this.settings, timer: parseFloat(this.settings.timer)},
-        settingsInputs: this.settings,
-        interval: setInterval(notify, parseFloat(this.settings.timer) * 60 * 1000),
-      });
-    }
+
+  componentDidMount() {
+    const settings = remote.getCurrentWindow().loadSettings();
+    this.setState({
+      settings: {...settings, timer: parseInt(settings.timer, 10) > 0 ? parseInt(settings.timer, 10) : defaultTimer},
+      settingsInputs: settings,
+      interval: setInterval(notify, settings.timer * 60 * 1000),
+    });
   }
 
   onSettingChange(setting, value) {
     this.setState({ settingsInputs: { ...this.state.settingsInputs, [setting]: value } });
   }
 
-  onSettingsSave() {
-    console.log(this.state.settingsInputs)
+  resetInterval() {
     if (this.state.interval) {
       clearInterval(this.state.interval);
     }
-    remote.getCurrentWindow().saveSettings(this.state.settingsInputs);
+  }
 
-    this.setState((state) => ({
-      interval: setInterval(notify, parseFloat(state.settingsInputs.timer) * 60 * 1000),
-      settings: { ...state.settingsInputs }
-    }));
+  onSettingsSave() {
+    this.resetInterval();
+
+    this.setState((state) => {
+      const updatedSettings = {
+        ...state.settingsInputs,
+        jql: state.settingsInputs.jql.trim() ? state.settingsInputs.jql : defaultJQL,
+        timer: state.settingsInputs.timer > 0 ? state.settingsInputs.timer : defaultTimer,
+      }
+      remote.getCurrentWindow().saveSettings(updatedSettings);
+
+      return {
+        interval: setInterval(notify, updatedSettings.timer * 60 * 1000),
+        menuOpen: false,
+        settings: updatedSettings,
+      }
+    });
   }
 
   onHeaderMenuClick() {
-    this.setState({ menuOpen: !this.state.menuOpen });
+    this.setState(state => {
+      const settingsInputs = state.menuOpen ? state.settings : state.settingsInputs;
+      settingsInputs.jql = settingsInputs.jql.trim() ? settingsInputs.jql : defaultJQL;
+      settingsInputs.timer = settingsInputs.timer > 0 ? settingsInputs.timer : defaultTimer;
+
+      return {
+        menuOpen: !state.menuOpen,
+        settingsInputs: settingsInputs,
+      }
+    });
+  }
+
+  requiredSettingsPresent() {
+    return this.state.settings.username !== '' && this.state.settings.apikey !== '' && this.state.settings.jiraHost;
   }
 
   render() {
     return (
       <div className="App">
-        <Header onClick={this.onHeaderMenuClick.bind(this)} />
+        <Header
+          onClick={this.onHeaderMenuClick.bind(this)}
+          icon={this.state.menuOpen ? 'close' : 'settings'}/>
         <div className="App-body">
           {this.state.menuOpen && <Settings onChange={this.onSettingChange.bind(this)} onSave={this.onSettingsSave.bind(this)} settings={this.state.settingsInputs} />}
-          <TimeLogger jql={this.state.settings.jql} />
+          {!this.requiredSettingsPresent() && <Initial />}
+          {this.requiredSettingsPresent() && <TimeLogger onLogTime={this.resetInterval.bind(this)} jql={this.state.settings.jql} />}
         </div>
       </div>
     )
   }
 }
 
-class Header extends Component {
-  render() {
-    return (
-      <div className="Header">
-        <span className="Header-title">Timelogger</span>
-        <button onClick={this.props.onClick}>
-          <img className="Header-icon" src="settings.svg" />
-        </button>
-      </div>
-    )
-  }
-}
 
-class TimeLogger extends Component {
-  state = {
-    issues: [],
-    extraIssues: [],
-    extraKeys: [],
-    selectedKeys: {},
-    itemFilter: '',
-    addItemInput: '',
-    timeToLog: 30,
-    previousSubmitTimestamp: 0,
-    currentTimestamp: 0,
-    interval: null,
-  }
-
-  async componentDidMount() {
-    console.log("hello")
-    await this.loadJiraIssues();
-  }
-
-  async onSubmit() {
-    const keys = this.state.selectedKeys;
-    if (!Object.keys(keys).length) return alert("Must select items to log to");
-    const resp = await remote.getCurrentWindow().logTime(Object.keys(keys), this.state.timeToLog)
-    const timestamp = new Date().getTime();
-    this.setState({
-      currentTimestamp: timestamp,
-      previousSubmitTimestamp: timestamp,
-    });
-    if (!this.state.timeout) {
-      this.setState({
-        interval: setInterval(
-          () => {
-            this.setState({ currentTimestamp: new Date().getTime() })
-          }, 60000
-        )
-      });
-    }
-    window.alert("logged time to " + resp.join(', '));
-  }
-
-  onAddItemChange(e) {
-    this.setState({ addItemInput: e.target.value });
-  }
-
-  async onAddKey() {
-    if (!this.state.addItemInput) return alert("Input cannot be empty");
-
-    const extraKeys = this.state.extraKeys.concat(this.state.addItemInput);
-
-    let extraIssues = [];
-    if (extraKeys.length) {
-      extraIssues = await remote.getCurrentWindow().loadIssues(`issuekey in (${extraKeys.join(',')})`);
-    }
-
-    this.setState({
-      addItemInput: '',
-      extraKeys,
-      extraIssues,
-    });
-  }
-
-  onIssueClick(key) {
-    if (key in this.state.selectedKeys) {
-      const selectedKeysWithoutKey = { ...this.state.selectedKeys };
-      delete selectedKeysWithoutKey[key];
-      this.setState({ selectedKeys: selectedKeysWithoutKey });
-    } else {
-      this.setState({ selectedKeys: { ...this.state.selectedKeys, [key]: true } });
-    }
-  }
-
-  async loadJiraIssues() {
-    const issues = await remote.getCurrentWindow().loadIssues(this.props.jql);
-    let extraIssues = [];
-    if (this.state.extraKeys.length) {
-      extraIssues = await remote.getCurrentWindow().loadIssues(`issuekey in (${this.state.extraKeys.join(',')})`);
-    }
-    this.setState({ issues, extraIssues });
-  }
-
-  onTimeToLogChange(e) {
-    this.setState({ timeToLog: e.target.value });
-  }
-
-  onClearSelection() {
-    this.setState({ selectedKeys: {} });
-  }
-
-  onFilterChange(e) {
-    this.setState({ itemFilter: e.target.value });
-  }
-
-  onLogThisMuch(amt) {
-    this.setState({ timeToLog: amt });
-  }
-
-  render() {
-    const allIssues = this.state.issues.concat(this.state.extraIssues);
-    const issues = this.state.itemFilter ? allIssues.filter(issue => (issue.key + ' ' + issue.fields.summary).toLowerCase().includes(this.state.itemFilter.toLowerCase())) : allIssues;
-    const timeSinceLog = Math.floor((this.state.currentTimestamp - this.state.previousSubmitTimestamp) / 60000);
-
-    return (
-      <div className="Timelogger" style={{ display: "flex", flexDirection: "column" }}>
-        <div className="Timelogger-controls">
-          <span className="label">Add item:</span><input onChange={(e) => this.onAddItemChange(e)} value={this.state.addItemInput}></input>
-          <button onClick={() => this.onAddKey()}>
-            <img className="Timelogger-icon" src="add.svg" />
-          </button>
-
-          <button className="Timelogger-reload" onClick={async () => await this.loadJiraIssues()}>
-            <img className="Timelogger-icon" src="reload.svg" />
-          </button>
-        </div>
-
-        <ul className="Timelogger-list">
-          {issues.map((issue) => {
-            return <li className={"Timelogger-listItem" + (issue.key in this.state.selectedKeys ? " is-selected" : "")} key={issue.key}>
-              <button onClick={() => this.onIssueClick(issue.key)}>
-                <div>
-                  {issue.fields.summary}
-                </div>
-                <div className="Timelogger-listItemKey">
-                  {issue.key}
-                </div>
-              </button>
-            </li>;
-          })}
-        </ul>
-
-        <div className="Timelogger-bottomControls">
-          <div className="Timelogger-control">
-            <span className="label">Filter:</span> <input onChange={(e) => this.onFilterChange(e)} type="text"></input>
-          </div>
-
-          <button className="btn_secondary" onClick={() => this.onClearSelection()}>
-            Clear Selections
-          </button>
-        </div>
-
-        <div className="Timelogger-btnWrapper">
-          <button className="Timelogger-submit btn" onClick={this.onSubmit.bind(this)}>
-            Log Time
-          </button>
-        </div>
-
-        <div className="Timelogger-status">
-          <div>
-            <span className="label">Log this many minutes:</span>
-            <input onChange={this.onTimeToLogChange.bind(this)} value={this.state.timeToLog} />
-          </div>
-          {this.state.previousSubmitTimestamp != 0 &&
-          <div className="Timelogger-history">
-            <span className="label">Minutes since last log:</span>
-            {timeSinceLog}
-
-            <div style={{marginLeft: '8px'}}>
-              <button className="btn_secondary" onClick={() => this.onLogThisMuch(timeSinceLog)}>(use this amount)</button>
-            </div>
-          </div>}
-        </div>
-      </div>
-    )
-  }
-}
-
-class Settings extends Component {
-  render() {
-    const { timer, username, apikey, jql } = this.props.settings;
-    return (
-      <div className="Settings">
-        <div>
-          Notification Timer: <input type="number" onChange={(e) => this.props.onChange('timer', e.target.value)} value={timer}></input>
-        </div>
-        <div>
-          Username: <input onChange={(e) => this.props.onChange('username', e.target.value)} value={username}></input>
-        </div>
-        <div>
-          Apikey: <input type="password" onChange={(e) => this.props.onChange('apikey', e.target.value)} value={apikey}></input>
-        </div>
-        <div>
-          JQL: <input size="125" onChange={(e) => this.props.onChange('jql', e.target.value)} value={jql}></input>
-        </div>
-        <button className="btn" onClick={this.props.onSave}>Save Settings</button>
-      </div>
-    );
-  }
-}
-
-export { TimeLogger, App };
+export { App };

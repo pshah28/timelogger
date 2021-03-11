@@ -1,0 +1,19 @@
+.Header
+{
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.Header-title
+{
+  font-weight: bold;
+  font-size: 24px;
+  color: #351431;
+}
+
+.Header-icon
+{
+  height: 25px;
+  width: 25px;
+}

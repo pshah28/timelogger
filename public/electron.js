@@ -1,17 +1,40 @@
-const electron = require('electron');
-const { app, BrowserWindow } = electron;
+const { app, BrowserWindow } = require('electron');;
+const { Settings } = require('./Settings');
+const { AppUpdater } = require('./AppUpdater');
 const path = require("path");
 const isDev = require("electron-is-dev");
 var JiraApi = require('jira-client');
-const Configstore = require('configstore');
 // Initialize
-function createWindow() {
-  let mainWindow = new TimeLoggerWindow({
-    width: 900, 
-    webPreferences: {
-      nodeIntegration: false,
-      preload: __dirname + '/preload.js'
-    } });
+new AppUpdater();
+const baseJiraSettings = {
+  protocol: 'https',
+  host: '',
+  username: '',
+  password: '',
+  apiVersion: '2',
+  strictSSL: true,
+}
+
+let jiraHost = '';
+let jiraUser = '';
+let jiraPass = '';
+let jiraClient;
+function refreshJiraClient(settings) {
+  const { username, apikey, jiraHost : host } = settings;
+  if (username !== jiraUser || apikey !== jiraPass || jiraHost !== host) {
+    jiraHost = host;
+    jiraUser = username;
+    jiraPass = apikey;
+    jiraClient = new JiraApi(Object.assign(baseJiraSettings, {
+      username,
+      host,
+      password: apikey,
+    }))
+  }
+}
+
+async function createWindow() {
+  const mainWindow = new TimeLoggerWindow({ width: 900 });
   mainWindow.loadURL(
     isDev ? "http://localhost:3000" : `file://${path.join(__dirname, "../build/index.html")}`
   );
@@ -21,57 +44,42 @@ function createWindow() {
 class TimeLoggerWindow extends BrowserWindow {
   constructor(options) {
     super(options)
-    this.config = new Configstore("timelogger");
-    let settings = this.loadSettings()
-    if (settings) {
-      this.jira = new JiraApi({
-        protocol: 'https',
-        host: 'yexttest.atlassian.net',
-        username: settings.username,
-        password: settings.apikey,
-        apiVersion: '2',
-        strictSSL: true
-      });
-    }
+    this.loadSettings();
   }
-  
-   async loadIssues(jql) {
-      const resp = await this.jira.searchJira(jql)
-      return resp.issues;
-    }
 
-    loadSettings() {
-      let settings = this.config.get('settings')
-      return settings ? settings : {timer:30}
-    }
+  async loadIssues(jql) {
+    const resp = await jiraClient.searchJira(jql);
+    return resp.issues;
+  }
 
-    saveSettings(data) {
-      this.config.set('settings', data)
-      this.jira = new JiraApi({
-        protocol: 'https',
-        host: 'yexttest.atlassian.net',
-        username: data.username,
-        password: data.apikey,
-        apiVersion: '2',
-        strictSSL: true
-      })
-    }
+  loadSettings() {
+    const settings = new Settings();
+    const settingsData = settings.get();
+    refreshJiraClient(settingsData);
+    return settingsData;
+  }
 
-    async logTime(keys, minutes){
-      const logged = [];
-      const seconds = minutes * 60;
-      const secondsPerItem = seconds / keys.length
+  saveSettings(data) {
+    refreshJiraClient(data);
+    const settings = new Settings();
+    settings.set(data);
+  }
 
-      for (const key of keys) {
-        try {
-          await this.jira.addWorklog(key, { timeSpentSeconds: secondsPerItem });
-          logged.push(key);
-        } catch (err) {
-          throw err
-        }
+  async logTime(keys, minutes) {
+    const logged = [];
+    const seconds = minutes * 60;
+    const secondsPerItem = seconds / keys.length
+
+    for (const key of keys) {
+      try {
+        await jiraClient.addWorklog(key, { timeSpentSeconds: secondsPerItem });
+        logged.push(key);
+      } catch (err) {
+        throw err
       }
-      return logged
     }
+    return logged
+  }
 }
 
 app.on("ready", createWindow);
