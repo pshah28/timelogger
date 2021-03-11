@@ -34,7 +34,7 @@ function refreshJiraClient(settings) {
 }
 
 async function createWindow() {
-  const mainWindow = new TimeLoggerWindow({ width: 900 });
+  let mainWindow = new TimeLoggerWindow({ width: 900 });
   mainWindow.loadURL(
     isDev ? "http://localhost:3000" : `file://${path.join(__dirname, "../build/index.html")}`
   );
