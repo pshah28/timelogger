@@ -73,6 +73,13 @@ button
   padding: 16px;
 }
 
+.btn[disabled],
+ .btn[disabled]:hover
+{
+  cursor: default;
+  background-color: #b8a0b5;
+}
+
 .btn:hover
 {
   background-color: #775273;

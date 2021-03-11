@@ -29,6 +29,7 @@ export default class TimeLogger extends Component {
     currentTimestamp: 0,
     interval: null,
     isLoading: true,
+    isSubmitting: false,
   }
 
   componentDidMount() {
@@ -38,7 +39,13 @@ export default class TimeLogger extends Component {
   async onSubmit() {
     const keys = this.state.selectedKeys;
     if (!Object.keys(keys).length) return alert("Must select items to log to");
+    this.setState({
+      isSubmitting: true,
+    });
     const resp = await remote.getCurrentWindow().logTime(Object.keys(keys), this.state.timeToLog)
+    this.setState({
+      isSubmitting: false,
+    })
     const timestamp = new Date().getTime();
     this.setState({
       currentTimestamp: timestamp,
@@ -182,8 +189,8 @@ export default class TimeLogger extends Component {
         </div>}
 
         <div className="TimeLogger-btnWrapper">
-          <button className="TimeLogger-submit btn" onClick={this.onSubmit.bind(this)}>
-            Log Time
+          <button className="TimeLogger-submit btn" disabled={this.state.isSubmitting} onClick={this.onSubmit.bind(this)}>
+            {this.state.isSubmitting ? 'Submitting...' : 'Log Time'}
           </button>
         </div>
 
