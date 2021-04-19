@@ -2,7 +2,7 @@
   "name": "timelogger",
   "description": "Reminder to log your time",
   "author": "pshah28",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "private": true,
   "homepage": ".",
   "dependencies": {

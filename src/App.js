@@ -39,10 +39,11 @@ class App extends Component {
 
   componentDidMount() {
     const settings = remote.getCurrentWindow().loadSettings();
+    const timerValue = parseInt(settings.timer, 10) > 0 ? parseInt(settings.timer, 10) : defaultTimer;
     this.setState({
-      settings: {...settings, timer: parseInt(settings.timer, 10) > 0 ? parseInt(settings.timer, 10) : defaultTimer},
+      settings: {...settings, timer: timerValue},
       settingsInputs: settings,
-      interval: setInterval(notify, settings.timer * 60 * 1000),
+      interval: setInterval(notify, timerValue * 60 * 1000),
     });
   }
 
@@ -62,7 +63,7 @@ class App extends Component {
     this.setState((state) => {
       const updatedSettings = {
         ...state.settingsInputs,
-        jql: state.settingsInputs.jql.trim() ? state.settingsInputs.jql : defaultJQL,
+        jql: state.settingsInputs.jql && state.settingsInputs.jql.trim() ? state.settingsInputs.jql.trim() : defaultJQL,
         timer: state.settingsInputs.timer > 0 ? state.settingsInputs.timer : defaultTimer,
       }
       remote.getCurrentWindow().saveSettings(updatedSettings);
@@ -78,7 +79,7 @@ class App extends Component {
   onHeaderMenuClick() {
     this.setState(state => {
       const settingsInputs = state.menuOpen ? state.settings : state.settingsInputs;
-      settingsInputs.jql = settingsInputs.jql.trim() ? settingsInputs.jql : defaultJQL;
+      settingsInputs.jql = settingsInputs.jql && settingsInputs.jql.trim() ? settingsInputs.jql.trim() : defaultJQL;
       settingsInputs.timer = settingsInputs.timer > 0 ? settingsInputs.timer : defaultTimer;
 
       return {
